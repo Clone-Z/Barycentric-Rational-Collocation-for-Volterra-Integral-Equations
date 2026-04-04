@@ -12,16 +12,6 @@ The codes reproduce the computed solutions for the Volterra integral equations o
 - **Chebfun** toolbox – required for computing Gauss–Laguerre nodes and weights with high accuracy.  
   Download and install Chebfun from [https://www.chebfun.org](https://www.chebfun.org).
 
-## File List
-
-| File | Description |
-|------|-------------|
-| `example1.m` | Solves Example 1 – VIE with exact solution \(u(x)=x^{1/n}\) (here \(n\) is the number of collocation points). Demonstrates root‑exponential convergence vs. Floater–Hormann method. |
-| `example2.m` | Solves Example 2 – VIE with exact solution \(u(x)=\sqrt[3]{x}\) (\(\alpha=0.2\)). Tests different clustering parameters \(\sigma\). |
-| `example3.m` | Solves Example 3 – VIE with exact solution \(u(x)=x^{2/5}\) (\(\alpha=0.4\)). Shows influence of \(\sigma\) on convergence and condition number. |
-
-All scripts are self‑contained and produce the numerical solution, compute the uniform‑norm error, and optionally plot the convergence behaviour.
-
 ## Usage
 
 1. **Install Chebfun** and make sure it is on your MATLAB path.
