@@ -14,7 +14,7 @@
 %   Modified: with comments for GitHub
 
 clear; clc;
-
+tic
 %% Load precomputed barycentric weights and nodes (optimized for α=0.4)
 %   The file 'NW04.mat' contains cell arrays NW{n,1} (nodes) and NW{n,2} (weights)
 %   for the rational interpolation with tapered exponentially clustered poles.
@@ -60,6 +60,11 @@ for n = nn
     %    L(i,j) = x_i^{1-λ-θ} * ∫_0^∞ k(x_i, s) l_j(x_i e^{-s/(1-θ)}) s^{-λ} e^{-s} ds
     %    Here λ = -alp, θ = -beta, so 1-λ-θ = 1+alp+beta.
     E = eye(n+1);
+    L1 = zeros(size(xx));       % accumulate over fine grid points
+    for i = 1:length(xi)
+        L1 = L1 + abs(bary(xx, E(:,i), xi, wi));
+    end
+    LC1(k) = max(L1);
     L = zeros(n+1);
     for i = 1:(n+1)
         t = xi(i);
@@ -69,7 +74,7 @@ for n = nn
             L(i,j) = int1;
         end
     end
-
+      LC1(k) = max(L1);
     % 4) Build the linear system (I - L) u_n = f
     %    The original equation is u - integral = f.
     N = E - L;
@@ -96,24 +101,32 @@ tiledlayout(1, 2, 'TileSpacing', 'loose', 'Padding', 'compact');
 nexttile;
 semilogy(sqrt(nn), err, 'o-', 'LineWidth', 1.2); hold on;
 % Theoretical optimal rate (Stahl) for α=0.4
-semilogy(3:10, 100 * exp(-2 * pi * sqrt(0.4) * (3:10)), '--k', 'LineWidth', 1.2);
+semilogy(3:10, 1 * exp(-2 * pi * sqrt(0.4) * (3:10)), '--k', 'LineWidth', 1.2);
 grid on;
 set(gca, 'linewidth', 1.1, 'fontsize', 16, 'fontname', 'times');
 xlabel('$\sqrt{n}$', 'Interpreter', 'latex');
 ylabel('uniform-norm error');
-legend('Barycentric rational collocation', '$100\exp(-2\pi\sqrt{0.4 n})$', ...
+legend('Errors on $[0,1]$', '$100\exp(-2\pi\sqrt{0.4 n})$', ...
        'Interpreter', 'latex');
 axis([2, 16, 1e-16, 1e-2]);
 
 % Right subplot: growth of the inverse norm ||(I-A)^{-1}||_∞
-nexttile;
-semilogy(nn, invNorm, 's-', 'LineWidth', 1.2);
-grid on;
-set(gca, 'linewidth', 1.1, 'fontsize', 16, 'fontname', 'times');
-xlabel('$n$', 'Interpreter', 'latex');
-ylabel('$\|(I-\hat{A})^{-1}\|_{\infty}$', 'Interpreter', 'latex');
+% nexttile;
+% semilogy(nn, invNorm, 's-', 'LineWidth', 1.2);
+% grid on;
+% set(gca, 'linewidth', 1.1, 'fontsize', 16, 'fontname', 'times');
+% xlabel('$n$', 'Interpreter', 'latex');
+% %ylabel('$\|(I-\hat{A})^{-1}\|_{\infty}$', 'Interpreter', 'latex');
+nexttile
+semilogx(nn, invNorm, '*-', 'LineWidth', 1.2); hold on
+semilogx(nn, LC1,  'o-', 'LineWidth', 1.2); grid on
+set(gca, 'linewidth', 1.1, 'fontsize', 16, 'fontname', 'times')
+legend('$\|(I-\hat{A})^{-1}\|_{\infty}$', 'Lebesgue constant', 'Interpreter', 'latex')
+xlabel('${n}$', 'Interpreter', 'latex')
+axis([0, 300, 0, 35]);
+
 title('Stability measure');
-axis([2, 240, 20, 30])
+%axis([2, 240, 20, 30])
 % Optional: Also plot pointwise error for the largest n (n=240) if desired
 % figure;
 % semilogy(xx, abs(U - Ut), '-', 'LineWidth', 1.2);
@@ -121,3 +134,4 @@ axis([2, 240, 20, 30])
 % xlabel('$x$', 'Interpreter', 'latex');
 % ylabel('absolute error');
 % title('Pointwise error for n=240');
+toc
